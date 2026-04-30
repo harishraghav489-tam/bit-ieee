@@ -83,9 +83,41 @@ export async function GET(request: NextRequest) {
       console.error('Profile fetch error in callback:', profileError.message)
     }
 
+    // Auto-register new students on first login
     if (!profile) {
-      await supabase.auth.signOut()
-      return redirectToLogin(origin, 'not_registered')
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+      const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+      if (!supabaseUrl || !serviceRoleKey) {
+        await supabase.auth.signOut()
+        return redirectToLogin(origin, 'not_registered')
+      }
+
+      const adminClient = createAdminClient(supabaseUrl, serviceRoleKey, {
+        auth: { persistSession: false },
+      })
+
+      const displayName = user.user_metadata?.full_name || user.user_metadata?.name || email.split('@')[0]
+
+      const { error: insertError } = await adminClient
+        .from('users')
+        .insert({
+          id: user.id,
+          email: email,
+          name: displayName,
+          full_name: displayName,
+          role: 'membership',
+          profile_completed: false,
+        })
+
+      if (insertError) {
+        console.error('Auto-registration failed:', insertError.message)
+        await supabase.auth.signOut()
+        return redirectToLogin(origin, 'auth_failed')
+      }
+
+      // New user → send to profile setup
+      return NextResponse.redirect(`${origin}/profile-setup`)
     }
 
     const role = profile.role as UserRole
