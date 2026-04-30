@@ -118,18 +118,18 @@ export default function Sidebar({ user }: { user: UserProfile }) {
 
   return (
     <aside className={cn(
-      "bg-white/[0.02] border-r border-white/8 flex flex-col transition-all duration-300 shrink-0",
+      "bg-[var(--bg-card)] border-r border-[var(--border)] flex flex-col transition-all duration-300 shrink-0 shadow-sm",
       collapsed ? "w-[68px]" : "w-64"
     )}>
       {/* Header */}
-      <div className="p-4 flex items-center gap-3 border-b border-white/5">
+      <div className="p-4 flex items-center gap-3 border-b border-[var(--border)]">
         <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#00629B] to-[#00bfff] flex items-center justify-center shrink-0 shadow-md shadow-[#00bfff]/15">
           <Zap className="w-4 h-4 text-white" />
         </div>
         {!collapsed && (
           <div className="min-w-0">
-            <h2 className="text-sm font-bold tracking-wide text-[#00bfff] truncate">{getRoleTitle(user.role)}</h2>
-            <p className="text-[10px] text-gray-500 uppercase tracking-widest">IEEE HUB</p>
+            <h2 className="text-sm font-bold tracking-wide text-[var(--accent-primary)] truncate">{getRoleTitle(user.role)}</h2>
+            <p className="text-[10px] text-[var(--text-muted)] uppercase tracking-widest">IEEE HUB</p>
           </div>
         )}
       </div>
@@ -149,8 +149,8 @@ export default function Sidebar({ user }: { user: UserProfile }) {
               )}
               title={collapsed ? item.label : undefined}
             >
-              <span className={cn(isActive ? "text-[#00bfff]" : "text-gray-500")}>{item.icon}</span>
-              {!collapsed && <span className="truncate">{item.label}</span>}
+              <span className={cn(isActive ? "text-[var(--accent-primary)]" : "text-[var(--text-muted)]")}>{item.icon}</span>
+              {!collapsed && <span className="truncate text-[var(--text-secondary)] font-medium">{item.label}</span>}
               {!collapsed && item.label === "Notifications" && unreadCount > 0 && (
                 <span className="ml-auto bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
                   {unreadCount}
@@ -164,20 +164,20 @@ export default function Sidebar({ user }: { user: UserProfile }) {
       {/* Collapse Toggle */}
       <button
         onClick={() => setCollapsed(!collapsed)}
-        className="mx-2 mb-2 p-2 rounded-lg text-gray-500 hover:text-white hover:bg-white/5 transition-colors flex items-center justify-center"
+        className="mx-2 mb-2 p-2 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] transition-colors flex items-center justify-center"
       >
         {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
       </button>
 
       {/* User Section */}
-      <div className="p-3 border-t border-white/5">
+      <div className="p-3 border-t border-[var(--border)]">
         <div className={cn("flex items-center gap-3", collapsed && "justify-center")}>
           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#00629B] to-[#00bfff] flex items-center justify-center shrink-0 text-white text-xs font-bold">
             {(user.name || user.email)?.[0]?.toUpperCase() || "?"}
           </div>
           {!collapsed && (
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate text-white">{user.name || "User"}</p>
+              <p className="text-sm font-medium truncate text-[var(--text-primary)]">{user.name || "User"}</p>
               <span className={cn("text-[10px] px-1.5 py-0.5 rounded-md font-semibold border", getRoleColor(user.role))}>
                 {getRoleLabel(user.role)}
               </span>
@@ -186,7 +186,7 @@ export default function Sidebar({ user }: { user: UserProfile }) {
           {!collapsed && (
             <button
               onClick={handleLogout}
-              className="text-gray-500 hover:text-red-400 transition-colors p-1"
+              className="text-[var(--text-muted)] hover:text-[var(--danger)] transition-colors p-1"
               title="Sign Out"
             >
               <LogOut className="w-4 h-4" />
