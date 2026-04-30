@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { ArrowRight, ShieldCheck, Users, Activity, Trophy, Zap, Globe, BookOpen } from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function Home() {
   return (
-    <div className="flex flex-col min-h-screen relative overflow-hidden">
+    <div className="flex flex-col min-h-screen relative overflow-hidden bg-[var(--bg-main)]">
       {/* Animated Background Orbs */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-[-15%] left-[-10%] w-[45%] h-[45%] rounded-full bg-[#00629B]/20 blur-[150px] animate-pulse" />
@@ -13,9 +14,9 @@ export default function Home() {
 
       {/* Subtle Grid Pattern Overlay */}
       <div 
-        className="fixed inset-0 pointer-events-none opacity-[0.03]"
+        className="fixed inset-0 pointer-events-none opacity-[0.03] dark:opacity-[0.03] opacity-10"
         style={{
-          backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
+          backgroundImage: `linear-gradient(var(--text-primary) 1px, transparent 1px), linear-gradient(90deg, var(--text-primary) 1px, transparent 1px)`,
           backgroundSize: '60px 60px',
         }}
       />
@@ -27,34 +28,35 @@ export default function Home() {
             <Zap className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h2 className="text-lg font-bold tracking-wide text-white">BIT IEEE HUB</h2>
-            <p className="text-[10px] text-gray-500 uppercase tracking-widest">BITS Sathy</p>
+            <h2 className="text-lg font-bold tracking-wide text-[var(--text-primary)]">BIT IEEE HUB</h2>
+            <p className="text-[10px] text-[var(--text-muted)] uppercase tracking-widest">BITS Sathy</p>
           </div>
         </div>
-        <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-400">
-          <Link href="#features" className="hover:text-white transition-colors">Features</Link>
-          <Link href="#societies" className="hover:text-white transition-colors">Societies</Link>
-          <Link href="/login" className="px-5 py-2.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 backdrop-blur-md transition-all text-white hover:-translate-y-0.5">
+        <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-[var(--text-muted)]">
+          <Link href="#features" className="hover:text-[var(--text-primary)] transition-colors">Features</Link>
+          <Link href="#societies" className="hover:text-[var(--text-primary)] transition-colors">Societies</Link>
+          <Link href="/login" className="px-5 py-2.5 rounded-full bg-[var(--bg-secondary)] hover:bg-[var(--border)] border border-[var(--border)] backdrop-blur-md transition-all text-[var(--text-primary)] hover:-translate-y-0.5 shadow-sm">
             Sign In
           </Link>
+          <ThemeToggle />
         </nav>
       </header>
 
       {/* Hero Section */}
       <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 text-center mt-8 md:mt-16">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#00629B]/15 border border-[#00629B]/30 text-[#00bfff] text-xs font-semibold mb-8 uppercase tracking-wider">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#00629B]/10 border border-[#00629B]/20 text-[#00629B] dark:text-[#00bfff] text-xs font-semibold mb-8 uppercase tracking-wider">
           <span className="w-2 h-2 rounded-full bg-[#00bfff] animate-pulse" />
           Official BITS Sathy IEEE Portal
         </div>
         
-        <h1 className="font-heading text-6xl md:text-8xl lg:text-9xl leading-none mb-6 tracking-wide">
+        <h1 className="font-heading text-6xl md:text-8xl lg:text-9xl leading-none mb-6 tracking-wide text-[var(--text-primary)]">
           Empower Your <br className="hidden md:block" />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00bfff] via-[#00629B] to-[#00bfff]">
             Engineering Journey
           </span>
         </h1>
         
-        <p className="max-w-2xl text-lg md:text-xl text-gray-400 mb-12 leading-relaxed">
+        <p className="max-w-2xl text-lg md:text-xl text-[var(--text-muted)] mb-12 leading-relaxed">
           The ultimate platform for BITS Sathy students to manage societies, track activity points, 
           build dynamic resumes, and engage in exclusive IEEE events.
         </p>
@@ -69,14 +71,14 @@ export default function Home() {
           </Link>
           <Link
             href="#features"
-            className="flex items-center gap-2 px-8 py-4 rounded-full border border-white/10 text-gray-300 hover:text-white hover:bg-white/5 transition-all"
+            className="flex items-center gap-2 px-8 py-4 rounded-full border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] transition-all bg-[var(--bg-card)] shadow-sm"
           >
             Explore Features
           </Link>
         </div>
 
         {/* Stats Bar */}
-        <div className="flex flex-wrap justify-center gap-8 md:gap-16 mt-20 py-6 px-8 rounded-2xl glass-card max-w-3xl w-full">
+        <div className="flex flex-wrap justify-center gap-8 md:gap-16 mt-20 py-6 px-8 rounded-2xl bg-[var(--bg-card)] border border-[var(--border)] shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_var(--shadow)] max-w-3xl w-full">
           <StatItem value="12" label="IEEE Societies" />
           <StatItem value="500+" label="Active Members" />
           <StatItem value="100+" label="Events Annually" />
@@ -109,10 +111,10 @@ export default function Home() {
 
         {/* Societies Section */}
         <div id="societies" className="mt-32 max-w-6xl w-full">
-          <h2 className="text-4xl md:text-5xl font-heading tracking-wide text-center mb-4">
+          <h2 className="text-4xl md:text-5xl font-heading tracking-wide text-center mb-4 text-[var(--text-primary)]">
             IEEE <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00bfff] to-[#00629B]">Societies</span>
           </h2>
-          <p className="text-gray-400 text-center mb-12 max-w-xl mx-auto">
+          <p className="text-[var(--text-muted)] text-center mb-12 max-w-xl mx-auto">
             Join any of our specialized technical societies and contribute to cutting-edge engineering communities.
           </p>
 
@@ -120,13 +122,13 @@ export default function Home() {
             {societies.map((society, index) => (
               <div 
                 key={index}
-                className="glass-card-hover p-4 text-center group"
+                className="bg-[var(--bg-card)] hover:bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl p-4 text-center group transition-colors shadow-sm"
               >
-                <div className="w-10 h-10 mx-auto rounded-lg bg-gradient-to-br from-[#00629B]/20 to-[#00bfff]/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                  <Globe className="w-5 h-5 text-[#00bfff]" />
+                <div className="w-10 h-10 mx-auto rounded-lg bg-[#00629B]/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                  <Globe className="w-5 h-5 text-[#00629B] dark:text-[#00bfff]" />
                 </div>
-                <p className="font-bold text-sm text-white">{society.abbr}</p>
-                <p className="text-xs text-gray-500 mt-1 leading-tight">{society.name}</p>
+                <p className="font-bold text-sm text-[var(--text-primary)]">{society.abbr}</p>
+                <p className="text-xs text-[var(--text-muted)] mt-1 leading-tight">{society.name}</p>
               </div>
             ))}
           </div>
@@ -134,7 +136,7 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="relative z-10 py-8 border-t border-white/5 mt-32 text-center text-gray-500 text-sm">
+      <footer className="relative z-10 py-8 border-t border-[var(--border)] mt-32 text-center text-[var(--text-muted)] text-sm bg-[var(--bg-card)]">
         <p>&copy; {new Date().getFullYear()} BITS Sathy IEEE Student Branch. All rights reserved.</p>
       </footer>
     </div>
@@ -144,20 +146,20 @@ export default function Home() {
 function StatItem({ value, label }: { value: string; label: string }) {
   return (
     <div className="text-center">
-      <p className="text-2xl md:text-3xl font-bold text-white">{value}</p>
-      <p className="text-xs text-gray-400 mt-1">{label}</p>
+      <p className="text-2xl md:text-3xl font-bold text-[var(--text-primary)]">{value}</p>
+      <p className="text-xs text-[var(--text-muted)] mt-1">{label}</p>
     </div>
   );
 }
 
 function FeatureCard({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) {
   return (
-    <div className="glass-card-hover p-6 group">
-      <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-[#00629B]/20 to-[#00bfff]/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform text-[#00bfff]">
+    <div className="bg-[var(--bg-card)] hover:bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl p-6 group transition-colors shadow-sm">
+      <div className="w-12 h-12 rounded-lg bg-[#00629B]/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform text-[#00629B] dark:text-[#00bfff]">
         {icon}
       </div>
-      <h3 className="text-xl font-heading tracking-wide mb-2 text-white">{title}</h3>
-      <p className="text-gray-400 text-sm leading-relaxed">{description}</p>
+      <h3 className="text-xl font-heading tracking-wide mb-2 text-[var(--text-primary)]">{title}</h3>
+      <p className="text-[var(--text-muted)] text-sm leading-relaxed">{description}</p>
     </div>
   );
 }

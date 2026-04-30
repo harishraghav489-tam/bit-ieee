@@ -46,6 +46,7 @@ const leadershipNav: NavItem[] = [
 
 const memberNav: NavItem[] = [
   { href: "/member/dashboard", icon: <LayoutDashboard className="w-5 h-5" />, label: "Dashboard" },
+  { href: "/member/activity", icon: <Activity className="w-5 h-5" />, label: "Activity" },
   { href: "/member/bookings", icon: <BookOpen className="w-5 h-5" />, label: "Book Events" },
   { href: "/member/society", icon: <Users className="w-5 h-5" />, label: "Society Status" },
   { href: "/member/task", icon: <CheckSquare className="w-5 h-5" />, label: "Task" },

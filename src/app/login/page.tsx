@@ -32,7 +32,7 @@ function LoginForm() {
 
   const ALLOWED_DOMAIN = "bitsathy.ac.in";
   function validateEmail(email: string): boolean {
-    const normalizedEmail = email.toLowerCase();
+    const normalizedEmail = email.trim().toLowerCase();
     return normalizedEmail.endsWith(`@${ALLOWED_DOMAIN}`) || ADMIN_EMAILS.includes(normalizedEmail);
   }
 

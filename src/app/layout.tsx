@@ -20,6 +20,8 @@ export const metadata: Metadata = {
   keywords: ["IEEE", "BITS Sathy", "Bannari Amman", "Society Hub", "Activity Points"],
 };
 
+import { ThemeProvider } from "@/components/ThemeProvider";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -29,21 +31,24 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${inter.variable} ${bebasNeue.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col font-body">
-        {children}
-        <Toaster
-          position="top-right"
-          richColors
-          theme="dark"
-          toastOptions={{
-            style: {
-              background: '#132240',
-              border: '1px solid rgba(255,255,255,0.1)',
-              color: '#f8fafc',
-            },
-          }}
-        />
+        <ThemeProvider>
+          {children}
+          <Toaster
+            position="top-right"
+            richColors
+            theme="dark"
+            toastOptions={{
+              style: {
+                background: '#132240',
+                border: '1px solid rgba(255,255,255,0.1)',
+                color: '#f8fafc',
+              },
+            }}
+          />
+        </ThemeProvider>
       </body>
     </html>
   );

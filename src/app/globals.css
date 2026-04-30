@@ -15,6 +15,7 @@
 
 @layer base {
   :root {
+    /* Old existing variables to keep things from breaking if used elsewhere */
     --background: #0a1628;
     --foreground: #f8fafc;
     --card: rgba(255, 255, 255, 0.02);
@@ -22,6 +23,46 @@
     --muted: #94a3b8;
     --accent: #00629B;
     --accent-light: #00bfff;
+
+    /* Light Theme Tokens */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f4f6f9;
+    --bg-card: #ffffff;
+    --bg-sidebar: #1a1f36;
+    --border: #e2e8f0;
+    --text-primary: #1a202c;
+    --text-secondary: #4a5568;
+    --text-muted: #718096;
+    --accent-primary: #2563eb;
+    --accent-secondary: #1e40af;
+    --accent-gold: #f59e0b;
+    --success: #16a34a;
+    --warning: #d97706;
+    --danger: #dc2626;
+    --shadow: rgba(0,0,0,0.08);
+  }
+
+  .dark {
+    /* Dark Theme Tokens */
+    --bg-primary: #0f1117;
+    --bg-secondary: #1a1f2e;
+    --bg-card: #1e2337;
+    --bg-sidebar: #111827;
+    --border: #2d3748;
+    --text-primary: #f7fafc;
+    --text-secondary: #cbd5e0;
+    --text-muted: #718096;
+    --accent-primary: #3b82f6;
+    --accent-secondary: #2563eb;
+    --accent-gold: #fbbf24;
+    --success: #22c55e;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --shadow: rgba(0,0,0,0.4);
+
+    /* Override old background for dark theme */
+    --background: var(--bg-primary);
+    --foreground: var(--text-primary);
   }
 
   * {
@@ -43,12 +84,12 @@
   }
 
   body {
-    background: linear-gradient(135deg, #0a1628 0%, #0f1d32 40%, #132240 70%, #0a1628 100%);
-    background-attachment: fixed;
-    color: var(--foreground);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
     font-family: var(--font-body);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
   
   h1, h2, h3, h4, h5, h6 {

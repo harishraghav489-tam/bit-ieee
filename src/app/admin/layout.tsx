@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Sidebar from "@/components/sidebar";
 import type { UserProfile } from "@/lib/types";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -20,13 +21,18 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   }
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden bg-[var(--bg-primary)]">
       <Sidebar user={profile as UserProfile} />
-      <main className="flex-1 overflow-y-auto p-6 md:p-8">
-        <div className="animate-fade-in">
-          {children}
-        </div>
-      </main>
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <header className="h-16 shrink-0 flex items-center justify-end px-6 border-b border-[var(--border)] bg-[var(--bg-card)]">
+          <ThemeToggle />
+        </header>
+        <main className="flex-1 overflow-y-auto p-6 md:p-8 bg-[var(--bg-primary)]">
+          <div className="animate-fade-in">
+            {children}
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

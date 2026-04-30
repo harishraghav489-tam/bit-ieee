@@ -5,13 +5,7 @@
 -- ============================================
 -- MIGRATION: Remove admin_secondary from existing data
 -- ============================================
-DO $$
-BEGIN
-  -- Migrate any existing admin_secondary users to admin_primary
-  IF EXISTS (SELECT 1 FROM users WHERE role = 'admin_secondary') THEN
-    UPDATE users SET role = 'admin_primary' WHERE role = 'admin_secondary';
-  END IF;
-END $$;
+-- Migration logic removed to prevent error on fresh setup
 
 -- ============================================
 -- TABLES (CREATE IF NOT EXISTS — safe to re-run)
@@ -440,3 +434,90 @@ CREATE POLICY "Users can update own media"
 CREATE POLICY "Users can delete own media"
   ON storage.objects FOR DELETE
   USING (bucket_id = 'media' AND auth.uid() = owner);
+
+-- ============================================
+-- NEW FEATURE UPDATES (v4)
+-- ============================================
+
+-- Add last_login to users
+ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login TIMESTAMPTZ;
+
+-- Add new columns to events
+ALTER TABLE events ADD COLUMN IF NOT EXISTS organizer_name TEXT;
+ALTER TABLE events ADD COLUMN IF NOT EXISTS organizer_department TEXT;
+ALTER TABLE events ADD COLUMN IF NOT EXISTS title TEXT;
+ALTER TABLE events ADD COLUMN IF NOT EXISTS short_description TEXT;
+ALTER TABLE events ADD COLUMN IF NOT EXISTS detailed_description TEXT;
+ALTER TABLE events ADD COLUMN IF NOT EXISTS start_time TIME;
+ALTER TABLE events ADD COLUMN IF NOT EXISTS end_time TIME;
+ALTER TABLE events ADD COLUMN IF NOT EXISTS attendance_type TEXT DEFAULT 'otp';
+ALTER TABLE events ADD COLUMN IF NOT EXISTS max_capacity INT DEFAULT 70;
+ALTER TABLE events ADD COLUMN IF NOT EXISTS current_bookings INT DEFAULT 0;
+ALTER TABLE events ADD COLUMN IF NOT EXISTS admin_notes TEXT;
+ALTER TABLE events ADD COLUMN IF NOT EXISTS event_date DATE;
+
+-- Update event_bookings to add attendance columns
+ALTER TABLE event_bookings ADD COLUMN IF NOT EXISTS attended_start BOOLEAN DEFAULT false;
+ALTER TABLE event_bookings ADD COLUMN IF NOT EXISTS attended_end BOOLEAN DEFAULT false;
+
+-- Create OTPS table
+CREATE TABLE IF NOT EXISTS otps (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  event_id UUID NOT NULL REFERENCES events(id) ON DELETE CASCADE,
+  otp_type TEXT NOT NULL CHECK (otp_type IN ('start','end')),
+  otp_code TEXT NOT NULL,
+  issued_by UUID NOT NULL REFERENCES users(id),
+  valid_seconds INT NOT NULL,
+  expires_at TIMESTAMPTZ,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Create attendance table
+CREATE TABLE IF NOT EXISTS attendance (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  event_id UUID NOT NULL REFERENCES events(id) ON DELETE CASCADE,
+  member_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  otp_type TEXT NOT NULL CHECK (otp_type IN ('start','end')),
+  marked_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Create event_team table
+CREATE TABLE IF NOT EXISTS event_team (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  event_id UUID NOT NULL REFERENCES events(id) ON DELETE CASCADE,
+  member_id UUID NOT NULL REFERENCES users(id),
+  role TEXT NOT NULL,
+  assigned_by UUID REFERENCES users(id),
+  assigned_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Add pg_cron for auto cleanup
+-- NOTE: pg_cron extension must be enabled in the Supabase Dashboard first.
+-- CREATE EXTENSION IF NOT EXISTS pg_cron;
+-- SELECT cron.schedule(
+--   'ieee-hub-event-cleanup',
+--   '0 * * * *',
+--   $$
+--     DELETE FROM events
+--     WHERE status = 'rejected'
+--        OR (
+--             status = 'completed'
+--             AND (
+--               event_date < current_date
+--               OR (event_date = current_date AND end_time < current_time)
+--             )
+--           );
+--   $$
+-- );
+
+-- RLS for new tables
+ALTER TABLE otps ENABLE ROW LEVEL SECURITY;
+ALTER TABLE attendance ENABLE ROW LEVEL SECURITY;
+ALTER TABLE event_team ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Issuers manage own OTPs" ON otps FOR ALL USING (issued_by = auth.uid() OR EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'admin_primary'));
+CREATE POLICY "Users insert own attendance" ON attendance FOR INSERT WITH CHECK (member_id = auth.uid());
+CREATE POLICY "Users view own attendance" ON attendance FOR SELECT USING (member_id = auth.uid() OR EXISTS (SELECT 1 FROM events WHERE id = event_id AND organiser_id = auth.uid()) OR EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'admin_primary'));
+CREATE POLICY "Admins manage event_team" ON event_team FOR ALL USING (EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'admin_primary'));
+CREATE POLICY "Everyone views event_team" ON event_team FOR SELECT USING (true);
