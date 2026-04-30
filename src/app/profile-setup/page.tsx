@@ -62,7 +62,6 @@ type Step3Data = z.infer<typeof step3Schema>;
 // ────────────────────────────────────────────
 
 export default function ProfileSetupPage() {
-  const supabase = createClient();
   const router = useRouter();
 
   const [step, setStep] = useState(1);
@@ -82,6 +81,7 @@ export default function ProfileSetupPage() {
   // ── Route guard + pre-fill ──
   useEffect(() => {
     async function init() {
+      const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (!user?.email) { router.replace("/login"); return; }
 
@@ -124,6 +124,7 @@ export default function ProfileSetupPage() {
     setSubmitting(true);
 
     try {
+      const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (!user?.email) throw new Error("Session expired");
 
