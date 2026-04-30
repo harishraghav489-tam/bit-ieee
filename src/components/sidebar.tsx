@@ -8,7 +8,7 @@ import { getRoleLabel, getRoleColor, type UserRole, type UserProfile } from "@/l
 import {
   LayoutDashboard, Users, UserPlus, Activity, Bell, CheckSquare,
   CalendarDays, FileText, Megaphone, LogOut, Table,
-  ChevronLeft, ChevronRight, Zap, Settings,
+  ChevronLeft, ChevronRight, Zap, Settings, BookOpen,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
@@ -40,12 +40,14 @@ const leadershipNav: NavItem[] = [
   { href: "/leadership/dashboard", icon: <LayoutDashboard className="w-5 h-5" />, label: "Dashboard" },
   { href: "/leadership/society", icon: <Users className="w-5 h-5" />, label: "Society" },
   { href: "/leadership/event", icon: <CalendarDays className="w-5 h-5" />, label: "Event" },
+  { href: "/leadership/bookings", icon: <BookOpen className="w-5 h-5" />, label: "Book Events" },
   { href: "/leadership/update", icon: <FileText className="w-5 h-5" />, label: "Resume Builder" },
   { href: "/leadership/task", icon: <CheckSquare className="w-5 h-5" />, label: "Task" },
 ];
 
 const memberNav: NavItem[] = [
   { href: "/member/dashboard", icon: <LayoutDashboard className="w-5 h-5" />, label: "Dashboard" },
+  { href: "/member/bookings", icon: <BookOpen className="w-5 h-5" />, label: "Book Events" },
   { href: "/member/society", icon: <Users className="w-5 h-5" />, label: "Society Status" },
   { href: "/member/task", icon: <CheckSquare className="w-5 h-5" />, label: "Task" },
 ];

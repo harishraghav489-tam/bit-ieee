@@ -125,7 +125,7 @@ export default function AdminDashboard() {
           <h1 className="text-4xl font-heading tracking-wide mb-2">Platform Overview</h1>
           <p className="text-gray-400">Welcome to the Admin Dashboard</p>
         </div>
-        {userRole === "admin_primary" && (
+        {(userRole === "admin_primary" || userRole === "admin_secondary") && (
           <button onClick={handleExport} className="btn-secondary flex items-center gap-2 text-sm">
             <Download className="w-4 h-4" />
             Export All Data

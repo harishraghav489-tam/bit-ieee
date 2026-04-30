@@ -54,6 +54,7 @@ function AchievementsForm({ category, setCategory }: { category: string; setCate
         title: fd.get("title"),
         description: fd.get("description"),
         date: fd.get("date"),
+        link: fd.get("link") || null,
       });
 
       if (resume) {
@@ -97,6 +98,7 @@ function AchievementsForm({ category, setCategory }: { category: string; setCate
       <form onSubmit={handleSubmit} className="space-y-5">
         <div><label className="block text-sm text-gray-400 mb-1">Title *</label><input name="title" required className="input-field" placeholder="e.g. IoT Smart Farm" /></div>
         <div><label className="block text-sm text-gray-400 mb-1">Date / Duration *</label><input name="date" required className="input-field" placeholder="e.g. Aug 2025 - Dec 2025" /></div>
+        <div><label className="block text-sm text-gray-400 mb-1">Link (optional)</label><input name="link" className="input-field" placeholder="e.g. https://github.com/..." /></div>
         <div><label className="block text-sm text-gray-400 mb-1">Description *</label><textarea name="description" required rows={3} className="input-field resize-none" placeholder="Describe what you did..." /></div>
         <button type="submit" disabled={loading} className="w-full btn-primary flex items-center justify-center gap-2">
           <Plus className="w-5 h-5" /> {loading ? "Adding..." : "Add to Resume"}
@@ -187,7 +189,9 @@ function ResumePreview() {
                 {items.map((item: any, idx: number) => (
                   <div key={idx}>
                     <div className="flex justify-between items-baseline">
-                      <h3 className="font-bold text-lg">{item.title}</h3>
+                      <h3 className="font-bold text-lg">{item.link ? (
+                        <a href={item.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{item.title} ↗</a>
+                      ) : item.title}</h3>
                       <span className="text-sm text-gray-600">{item.date}</span>
                     </div>
                     <p className="text-gray-700 text-sm mt-1">{item.description}</p>

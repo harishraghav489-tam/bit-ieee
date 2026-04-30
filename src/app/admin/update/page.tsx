@@ -2,7 +2,7 @@
 
 import { createClient } from "@/lib/supabase/client";
 import { useState } from "react";
-import { Upload, Bell, CheckCircle, AlertCircle } from "lucide-react";
+import { Upload, Bell } from "lucide-react";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
 
@@ -56,32 +56,52 @@ function ActivityPointsForm() {
       const rows: any[] = XLSX.utils.sheet_to_json(sheet);
 
       let updated = 0;
+      let errors = 0;
       for (const row of rows) {
-        const email = row["Organiser Email"] || row["Email"] || row["email"] || "";
         const eventName = row["Event Name"] || row["event_name"] || "";
-        const points = parseInt(row["Points"] || row["Activity Points"] || "0");
+        const organiserEmail = row["Organiser Email"] || row["Email"] || row["email"] || "";
+        const points = parseInt(row["Activity Points"] || row["Points"] || "0");
         const organisedBy = row["Organised By"] || row["organised_by"] || "";
         const date = row["Date"] || row["date"] || null;
 
-        if (!email || !points) continue;
+        if (!eventName || !points) { errors++; continue; }
 
-        // Find user by email
-        const { data: user } = await supabase.from("users").select("id").eq("email", email).single();
-        if (!user) continue;
+        // Find the event by name and organiser email
+        const { data: event } = await supabase
+          .from("events")
+          .select("id, name")
+          .ilike("name", eventName)
+          .limit(1)
+          .single();
 
-        // Insert activity point
-        await supabase.from("activity_points").insert({
-          user_id: user.id,
-          points,
-          event_name: eventName,
-          organised_by: organisedBy,
-          organiser_email: email,
-          date: date ? new Date(date).toISOString() : new Date().toISOString(),
-        });
-        updated++;
+        if (!event) { errors++; continue; }
+
+        // Get all attendees (bookings) for this event
+        const { data: bookings } = await supabase
+          .from("event_bookings")
+          .select("user_id")
+          .eq("event_id", event.id);
+
+        if (!bookings || bookings.length === 0) { errors++; continue; }
+
+        // Award points to each attendee
+        const dateStr = date ? new Date(date).toISOString() : new Date().toISOString();
+        for (const booking of bookings) {
+          await supabase.from("activity_points").insert({
+            user_id: booking.user_id,
+            event_id: event.id,
+            points,
+            event_name: event.name,
+            organised_by: organisedBy,
+            organiser_email: organiserEmail,
+            date: dateStr,
+          });
+          updated++;
+        }
       }
 
-      toast.success(`Activity points allocated to ${updated} users`);
+      toast.success(`Activity points allocated to ${updated} attendees across ${rows.length} events`);
+      if (errors > 0) toast.warning(`${errors} rows had errors (event not found or no attendees)`);
       setFile(null);
     } catch (err: any) {
       toast.error(err.message || "Upload failed");

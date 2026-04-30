@@ -1,7 +1,7 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Lock, Code, CheckCircle, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 
@@ -21,9 +21,21 @@ export default function MemberTaskPage() {
     setError("");
 
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { setError("Not authenticated."); setLoading(false); return; }
+
+      // Get user's society
+      const { data: profile } = await supabase
+        .from("users")
+        .select("society_id")
+        .eq("id", user.id)
+        .single();
+
+      if (!profile?.society_id) { setError("You are not assigned to a society."); setLoading(false); return; }
+
       const { data: task } = await supabase
         .from("tasks")
-        .select("*, event:events(name)")
+        .select("*, event:events(name, society_id, booking_enabled)")
         .eq("otp", otp)
         .single();
 
@@ -34,6 +46,25 @@ export default function MemberTaskPage() {
         setError("This OTP has expired."); setLoading(false); return;
       }
 
+      // Check society isolation
+      if (task.event?.society_id !== profile.society_id) {
+        setError("This task is not available for your society."); setLoading(false); return;
+      }
+
+      // Check booking requirement
+      const { data: booking } = await supabase
+        .from("event_bookings")
+        .select("id")
+        .eq("event_id", task.event_id)
+        .eq("user_id", user.id)
+        .single();
+
+      if (!booking) {
+        setError("You have not booked this event. Please book it first from Book Events.");
+        setLoading(false);
+        return;
+      }
+
       setTaskData(task);
       setTaskActive(true);
     } catch {
@@ -42,6 +73,32 @@ export default function MemberTaskPage() {
       setLoading(false);
     }
   }
+
+  // Tab lock: prevent navigation/close during active task
+  useEffect(() => {
+    if (!taskActive) return;
+
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "Your task is in progress. Are you sure you want to leave?";
+      return e.returnValue;
+    };
+
+    // Push state to prevent back navigation
+    window.history.pushState(null, "", window.location.href);
+    const handlePopState = () => {
+      window.history.pushState(null, "", window.location.href);
+      toast.warning("You cannot navigate away until the task is completed.");
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [taskActive]);
 
   async function submitTask() {
     setLoading(true);

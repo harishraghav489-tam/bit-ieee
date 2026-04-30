@@ -2,7 +2,7 @@
 
 import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
-import { Send, Heart, MessageCircle, Image, Trash2 } from "lucide-react";
+import { Send, Heart, MessageCircle, Video } from "lucide-react";
 import { toast } from "sonner";
 
 export default function RepPostsPage() {
@@ -13,6 +13,7 @@ export default function RepPostsPage() {
   const [posting, setPosting] = useState(false);
   const [userId, setUserId] = useState("");
   const [societyId, setSocietyId] = useState("");
+  const [mediaFile, setMediaFile] = useState<File | null>(null);
 
   useEffect(() => {
     async function init() {
@@ -44,15 +45,51 @@ export default function RepPostsPage() {
     if (!newPost.trim()) return;
     setPosting(true);
 
+    let mediaUrl = null;
+
+    // Upload media if present
+    if (mediaFile) {
+      try {
+        const fileExt = mediaFile.name.split(".").pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
+        const filePath = `posts/${societyId}/${fileName}`;
+
+        const { error: uploadErr } = await supabase.storage
+          .from("media")
+          .upload(filePath, mediaFile, {
+            cacheControl: "3600",
+            upsert: false,
+          });
+
+        if (uploadErr) {
+          toast.error(`Media upload failed: ${uploadErr.message}`);
+          setPosting(false);
+          return;
+        }
+
+        const { data: urlData } = supabase.storage
+          .from("media")
+          .getPublicUrl(filePath);
+
+        mediaUrl = urlData.publicUrl;
+      } catch (err: any) {
+        toast.error(`Upload error: ${err.message}`);
+        setPosting(false);
+        return;
+      }
+    }
+
     const { error } = await supabase.from("posts").insert({
       society_id: societyId,
       author_id: userId,
       content: newPost,
+      media_url: mediaUrl,
     });
 
     if (error) { toast.error(error.message); } else {
       toast.success("Post published!");
       setNewPost("");
+      setMediaFile(null);
       fetchPosts(societyId);
     }
     setPosting(false);
@@ -81,7 +118,7 @@ export default function RepPostsPage() {
     <div className="space-y-6 animate-slide-up max-w-3xl">
       <div>
         <h1 className="text-4xl font-heading tracking-wide mb-2">Society Posts</h1>
-        <p className="text-gray-400">Share updates with your society's leadership and members.</p>
+        <p className="text-gray-400">Share updates with your society&apos;s leadership and members.</p>
       </div>
 
       {/* New Post */}
@@ -93,6 +130,27 @@ export default function RepPostsPage() {
           placeholder="Share an update with your society..."
           className="input-field resize-none mb-3"
         />
+
+        {/* Media Upload */}
+        <div className="mb-3">
+          <label className="flex items-center gap-2 text-sm text-gray-400 cursor-pointer hover:text-[#00bfff] transition-colors">
+            <Video className="w-4 h-4" />
+            {mediaFile ? mediaFile.name : "Attach video/image (optional)"}
+            <input
+              type="file"
+              accept="image/*,video/*"
+              className="hidden"
+              onChange={e => setMediaFile(e.target.files?.[0] || null)}
+            />
+          </label>
+          {mediaFile && (
+            <div className="mt-2 flex items-center gap-2 text-xs text-gray-500">
+              <span>{(mediaFile.size / 1024 / 1024).toFixed(2)} MB</span>
+              <button type="button" onClick={() => setMediaFile(null)} className="text-red-400 hover:underline">Remove</button>
+            </div>
+          )}
+        </div>
+
         <div className="flex justify-end">
           <button type="submit" disabled={posting || !newPost.trim()} className="btn-primary flex items-center gap-2 text-sm">
             <Send className="w-4 h-4" /> {posting ? "Posting..." : "Publish"}
@@ -144,6 +202,17 @@ function PostCard({ post, userId, onLike, onComment }: any) {
       </div>
 
       <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">{post.content}</p>
+
+      {/* Media */}
+      {post.media_url && (
+        <div className="rounded-lg overflow-hidden bg-black/30">
+          {post.media_url.match(/\.(mp4|webm|ogg|mov)$/i) ? (
+            <video src={post.media_url} controls className="w-full max-h-[400px] object-contain" />
+          ) : (
+            <img src={post.media_url} alt="Post media" className="w-full max-h-[400px] object-contain" />
+          )}
+        </div>
+      )}
 
       <div className="flex items-center gap-4 pt-2 border-t border-white/5">
         <button onClick={onLike} className={`flex items-center gap-1.5 text-sm transition-colors ${isLiked ? "text-red-400" : "text-gray-500 hover:text-red-400"}`}>

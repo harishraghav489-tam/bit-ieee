@@ -2,7 +2,7 @@
 
 import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
-import { KeyRound, ClipboardList, FileCheck, Upload } from "lucide-react";
+import { KeyRound, ClipboardList, FileCheck, Upload, UserCheck } from "lucide-react";
 import { toast } from "sonner";
 
 export default function LeadershipTaskPage() {
@@ -12,19 +12,20 @@ export default function LeadershipTaskPage() {
     <div className="space-y-6 animate-slide-up">
       <div>
         <h1 className="text-4xl font-heading tracking-wide mb-2">Task Management</h1>
-        <p className="text-gray-400">Generate OTPs, manage task sessions, and verify scores.</p>
+        <p className="text-gray-400">Generate OTPs, manage task sessions, verify scores, and attend events.</p>
       </div>
 
-      <div className="flex space-x-2 border-b border-white/10 pb-4">
+      <div className="flex space-x-2 border-b border-white/10 pb-4 overflow-x-auto">
         {[
           { id: "otp", icon: <KeyRound className="w-4 h-4" />, label: "OTP Manager" },
           { id: "manager", icon: <ClipboardList className="w-4 h-4" />, label: "Task Manager" },
           { id: "verify", icon: <FileCheck className="w-4 h-4" />, label: "My Task" },
+          { id: "attend", icon: <UserCheck className="w-4 h-4" />, label: "Task Attend" },
         ].map(t => (
           <button
             key={t.id}
             onClick={() => setActiveTab(t.id)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${activeTab === t.id ? "bg-[#00629B] text-white" : "text-gray-400 hover:text-white hover:bg-white/5"}`}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap ${activeTab === t.id ? "bg-[#00629B] text-white" : "text-gray-400 hover:text-white hover:bg-white/5"}`}
           >
             {t.icon} {t.label}
           </button>
@@ -35,6 +36,7 @@ export default function LeadershipTaskPage() {
         {activeTab === "otp" && <OTPManager />}
         {activeTab === "manager" && <TaskManager />}
         {activeTab === "verify" && <TaskVerify />}
+        {activeTab === "attend" && <TaskAttend />}
       </div>
     </div>
   );
@@ -211,6 +213,108 @@ function TaskVerify() {
           </tbody>
         </table>
       </div>
+    </div>
+  );
+}
+
+function TaskAttend() {
+  const supabase = createClient();
+  const [otp, setOtp] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [attended, setAttended] = useState(false);
+  const [eventName, setEventName] = useState("");
+  const [error, setError] = useState("");
+
+  async function handleAttend(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { setError("Not authenticated."); setLoading(false); return; }
+
+      // Validate OTP and get event
+      const { data: task } = await supabase
+        .from("tasks")
+        .select("id, event_id, event:events(name)")
+        .eq("otp", otp)
+        .single();
+
+      if (!task) { setError("Invalid OTP."); setLoading(false); return; }
+
+      // Check if already booked
+      const { data: existingBooking } = await supabase
+        .from("event_bookings")
+        .select("id")
+        .eq("event_id", task.event_id)
+        .eq("user_id", user.id)
+        .single();
+
+      if (existingBooking) {
+        setError("You have already booked/attended this event.");
+        setLoading(false);
+        return;
+      }
+
+      // Book the event for this leader
+      const { error: bookingErr } = await supabase.from("event_bookings").insert({
+        event_id: task.event_id,
+        user_id: user.id,
+      });
+
+      if (bookingErr) {
+        if (bookingErr.code === "23505") {
+          setError("Already attending this event.");
+        } else {
+          setError("Failed to mark attendance.");
+        }
+        setLoading(false);
+        return;
+      }
+
+      const eventName = Array.isArray(task.event) ? task.event[0]?.name : (task.event as any)?.name;
+      setEventName(eventName || "Unknown Event");
+      setAttended(true);
+      toast.success("Attendance marked successfully!");
+    } catch {
+      setError("An error occurred.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (attended) {
+    return (
+      <div className="space-y-4 text-center py-8">
+        <UserCheck className="w-16 h-16 text-green-500 mx-auto mb-4" />
+        <h3 className="text-xl font-bold text-white">Attendance Marked!</h3>
+        <p className="text-gray-400">You are now registered for &quot;<span className="text-[#00bfff]">{eventName}</span>&quot;</p>
+        <button onClick={() => { setAttended(false); setOtp(""); }} className="btn-secondary mt-4">Attend Another Event</button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-5">
+      <h3 className="text-xl font-medium flex items-center gap-2">
+        <UserCheck className="w-5 h-5 text-[#00bfff]" /> Attend Another Leader&apos;s Event
+      </h3>
+      <p className="text-sm text-gray-400">Enter the OTP shared by the event organiser to mark your attendance.</p>
+      <form onSubmit={handleAttend} className="space-y-4">
+        <input
+          value={otp}
+          onChange={e => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+          required
+          maxLength={6}
+          placeholder="Enter 6-digit OTP"
+          className="input-field font-mono tracking-widest text-center uppercase text-lg"
+        />
+        {error && <p className="text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">{error}</p>}
+        <button type="submit" disabled={loading || otp.length < 6} className="btn-primary w-full">
+          {loading ? "Verifying..." : "Mark Attendance"}
+        </button>
+      </form>
     </div>
   );
 }

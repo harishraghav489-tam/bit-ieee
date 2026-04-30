@@ -84,6 +84,18 @@ export default function MemberSocietyPage() {
               </div>
             </div>
             <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">{post.content}</p>
+
+            {/* Media */}
+            {post.media_url && (
+              <div className="rounded-lg overflow-hidden bg-black/30">
+                {post.media_url.match(/\.(mp4|webm|ogg|mov)$/i) ? (
+                  <video src={post.media_url} controls className="w-full max-h-[400px] object-contain" />
+                ) : (
+                  <img src={post.media_url} alt="Post media" className="w-full max-h-[400px] object-contain" />
+                )}
+              </div>
+            )}
+
             <div className="flex items-center gap-4 pt-2 border-t border-white/5">
               <button onClick={() => likePost(post.id)} className={`flex items-center gap-1.5 text-sm ${isLiked ? "text-red-400" : "text-gray-500 hover:text-red-400"}`}>
                 <Heart className={`w-4 h-4 ${isLiked ? "fill-current" : ""}`} /> {likes.length}

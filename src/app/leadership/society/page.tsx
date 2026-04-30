@@ -2,7 +2,7 @@
 
 import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
-import { Users, Award, CalendarDays, MessageCircle, Heart } from "lucide-react";
+import { Users, Award, CalendarDays, MessageCircle } from "lucide-react";
 
 export default function LeadershipSocietyPage() {
   const supabase = createClient();
@@ -87,6 +87,15 @@ export default function LeadershipSocietyPage() {
             {posts.map(p => (
               <div key={p.id} className="p-3 bg-white/[0.02] rounded-lg">
                 <p className="text-sm text-gray-300">{p.content}</p>
+                {p.media_url && (
+                  <div className="mt-2 rounded-lg overflow-hidden bg-black/30">
+                    {p.media_url.match(/\.(mp4|webm|ogg|mov)$/i) ? (
+                      <video src={p.media_url} controls className="w-full max-h-[300px] object-contain" />
+                    ) : (
+                      <img src={p.media_url} alt="Post media" className="w-full max-h-[300px] object-contain" />
+                    )}
+                  </div>
+                )}
                 <p className="text-xs text-gray-500 mt-1">— {p.author?.name} • {new Date(p.created_at).toLocaleDateString()}</p>
               </div>
             ))}

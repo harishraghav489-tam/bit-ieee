@@ -1,21 +1,16 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Bell, Check, X, Mail, Calendar } from "lucide-react";
 import { toast } from "sonner";
-import type { Event } from "@/lib/types";
 
 export default function AdminNotificationsPage() {
   const supabase = createClient();
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchPendingEvents();
-  }, []);
-
-  async function fetchPendingEvents() {
+  const fetchPendingEvents = useCallback(async () => {
     const { data } = await supabase
       .from("events")
       .select("*, organiser:users!events_organiser_id_fkey(name, email), society:societies(name, abbreviation)")
@@ -24,7 +19,11 @@ export default function AdminNotificationsPage() {
     
     setEvents(data || []);
     setLoading(false);
-  }
+  }, []);
+
+  useEffect(() => {
+    fetchPendingEvents();
+  }, [fetchPendingEvents]);
 
   async function handleApprove(event: any) {
     const { error } = await supabase
@@ -34,7 +33,6 @@ export default function AdminNotificationsPage() {
 
     if (error) { toast.error("Failed to approve"); return; }
 
-    // Create notification for organiser
     await supabase.from("notifications").insert({
       recipient_id: event.organiser_id,
       title: "Event Approved",
@@ -42,7 +40,38 @@ export default function AdminNotificationsPage() {
       type: "approval",
     });
 
-    toast.success(`Event "${event.name}" approved!`);
+    try {
+      const organiserEmail = event.organiser?.email;
+      if (organiserEmail) {
+        await fetch("/api/send-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            to: organiserEmail,
+            subject: `IEEE Hub — Event "${event.name}" Approved`,
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #00629B;">Event Approved!</h2>
+                <p>Dear ${event.organiser?.name || 'Leader'},</p>
+                <p>Your event request has been <strong>approved</strong> by the IEEE Hub administration.</p>
+                <div style="background: #f0f7ff; padding: 16px; border-radius: 8px; margin: 16px 0;">
+                  <p><strong>Event:</strong> ${event.name}</p>
+                  <p><strong>Society:</strong> ${event.society?.abbreviation || event.society?.name || 'N/A'}</p>
+                  <p><strong>Type:</strong> ${event.event_type || 'N/A'}</p>
+                  <p><strong>Status:</strong> <span style="color: green;">Booking Enabled</span></p>
+                </div>
+                <p>Members of your society can now book this event. You can generate an OTP for the task session from your Leadership panel.</p>
+                <p style="color: #666; font-size: 12px;">This is an automated email from IEEE BIT Hub. Please do not reply.</p>
+              </div>
+            `,
+          }),
+        });
+      }
+    } catch (err) {
+      console.error("Failed to send approval email:", err);
+    }
+
+    toast.success(`Event "${event.name}" approved! Email sent to organiser.`);
     fetchPendingEvents();
   }
 
