@@ -26,39 +26,39 @@
 
     /* Light Theme Tokens */
     --bg-primary: #ffffff;
-    --bg-secondary: #f4f6f9;
+    --bg-secondary: #f8fafc;
     --bg-card: #ffffff;
     --bg-sidebar: #1a1f36;
     --border: #e2e8f0;
-    --text-primary: #1a202c;
-    --text-secondary: #4a5568;
-    --text-muted: #718096;
-    --accent-primary: #2563eb;
-    --accent-secondary: #1e40af;
+    --text-primary: #0f172a;
+    --text-secondary: #334155;
+    --text-muted: #64748b;
+    --accent-primary: #00629B;
+    --accent-secondary: #004d7a;
     --accent-gold: #f59e0b;
-    --success: #16a34a;
+    --success: #059669;
     --warning: #d97706;
     --danger: #dc2626;
-    --shadow: rgba(0,0,0,0.08);
+    --shadow: rgba(0,0,0,0.06);
   }
 
   .dark {
     /* Dark Theme Tokens */
-    --bg-primary: #0f1117;
-    --bg-secondary: #1a1f2e;
-    --bg-card: #1e2337;
-    --bg-sidebar: #111827;
-    --border: #2d3748;
-    --text-primary: #f7fafc;
+    --bg-primary: #0a1628;
+    --bg-secondary: #0f1d32;
+    --bg-card: #132240;
+    --bg-sidebar: #0a1628;
+    --border: rgba(255, 255, 255, 0.08);
+    --text-primary: #f8fafc;
     --text-secondary: #cbd5e0;
-    --text-muted: #718096;
-    --accent-primary: #3b82f6;
-    --accent-secondary: #2563eb;
+    --text-muted: #94a3b8;
+    --accent-primary: #00bfff;
+    --accent-secondary: #0099cc;
     --accent-gold: #fbbf24;
-    --success: #22c55e;
+    --success: #10b981;
     --warning: #f59e0b;
     --danger: #ef4444;
-    --shadow: rgba(0,0,0,0.4);
+    --shadow: rgba(0,0,0,0.3);
 
     /* Override old background for dark theme */
     --background: var(--bg-primary);
@@ -100,9 +100,9 @@
 
 @layer components {
   .glass-card {
-    background: rgba(255, 255, 255, 0.02);
+    background: var(--bg-card);
     backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--border);
     border-radius: 1rem;
   }
 
@@ -162,16 +162,17 @@
     width: 100%;
     padding: 0.75rem 1rem;
     border-radius: 0.75rem;
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: white;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
     outline: none;
-    transition: border-color 0.2s ease;
+    transition: all 0.2s ease;
   }
 
   .input-field:focus {
-    border-color: #00bfff;
-    box-shadow: 0 0 0 2px rgba(0, 191, 255, 0.1);
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 2px var(--accent-primary);
+    background: var(--bg-card);
   }
 
   .input-field::placeholder {
