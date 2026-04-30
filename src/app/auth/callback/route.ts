@@ -29,20 +29,27 @@ export async function GET(request: Request) {
           return NextResponse.redirect(`${origin}/login?error=unauthorized_domain`)
         }
 
+        // Bypassing RLS here because Next.js request cookies are not immediately 
+        // readable after writing them in the same route handler.
+        import { createClient as createAdminClient } from '@supabase/supabase-js'
+        
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+        const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+        
+        const supabaseAdmin = createAdminClient(supabaseUrl, supabaseServiceKey)
+
         // Look up user in public.users by EMAIL (not id)
-        // because admin pre-populates rows before user ever logs in
-        const { data: profile } = await supabase
+        const { data: profile, error: profileError } = await supabaseAdmin
           .from('users')
           .select('role, society_id, profile_completed')
           .eq('email', email)
           .single()
 
-        if (!profile) {
+        if (profileError || !profile) {
+          console.error("Profile fetch error in callback:", profileError)
           // User is not pre-registered by admin
           await supabase.auth.signOut()
-          return NextResponse.redirect(
-            `${origin}/login?error=not_registered`
-          )
+          return NextResponse.redirect(`${origin}/login?error=not_registered`)
         }
 
         // Profile not completed → send to setup form
