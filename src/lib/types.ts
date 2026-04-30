@@ -212,13 +212,13 @@ export function getRoleLabel(role: UserRole): string {
 
 export function getRoleColor(role: UserRole): string {
   const colors: Record<UserRole, string> = {
-    admin_primary: 'bg-red-500/20 text-red-400 border-red-500/30',
-    student_rep: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
-    leadership: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-    membership: 'bg-green-500/20 text-green-400 border-green-500/30',
-    event_manager: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',
+    admin_primary: 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20',
+    student_rep: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20',
+    leadership: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20',
+    membership: 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20',
+    event_manager: 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20',
   }
-  return colors[role] || 'bg-gray-500/20 text-gray-400 border-gray-500/30'
+  return colors[role] || 'bg-gray-500/10 text-gray-600 dark:text-gray-400 border-gray-500/20'
 }
 
 export function getRoleDashboardPath(role: UserRole): string {
