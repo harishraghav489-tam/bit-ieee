@@ -51,10 +51,11 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(url)
     }
 
-    // Logged in + on /login → redirect to dashboard (which will route them)
-    if (user && path === '/login') {
+    // Logged in + on /login → only redirect if no error param
+    // (error param means auth flow failed, let them see the error message)
+    if (user && path === '/login' && !request.nextUrl.searchParams.get('error')) {
       const url = request.nextUrl.clone()
-      url.pathname = '/dashboard'
+      url.pathname = '/member/dashboard'
       return NextResponse.redirect(url)
     }
 
