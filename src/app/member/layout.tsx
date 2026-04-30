@@ -10,7 +10,13 @@ export default async function MemberLayout({ children }: { children: React.React
   if (!user?.email) redirect("/login");
 
   const { data: profile } = await supabase.from("users").select("*").eq("email", user.email.toLowerCase()).single();
-  if (!profile || profile.role !== "membership") redirect("/dashboard");
+  if (!profile) {
+    redirect("/dashboard");
+  }
+
+  if (profile.role !== "membership") {
+    redirect("/dashboard");
+  }
 
   return (
     <div className="flex h-screen overflow-hidden bg-[var(--bg-primary)]">

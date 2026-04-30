@@ -16,7 +16,12 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     .eq("email", user.email.toLowerCase())
     .single();
 
-  if (!profile || profile.role !== "admin_primary") {
+  if (!profile) {
+    // Fallback to the main dashboard router if profile lookup fails
+    redirect("/dashboard");
+  }
+
+  if (profile.role !== "admin_primary") {
     redirect("/dashboard");
   }
 
