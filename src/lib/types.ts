@@ -184,13 +184,7 @@ export const SKILL_OPTIONS = [
 
 // Role hierarchy helpers
 export const ADMIN_ROLES: UserRole[] = ['admin_primary']
-export const ADMIN_EMAILS = [
-  'bitieeehubadmin1@gmail.com',
-  'bitieeehubadmin2@gmail.com',
-  'aruneshownsty1@gmail.com',
-  'bitieeehubadmin3@gmail.com',
-  'bitieeehubadmin4@gmail.com',
-]
+export const ADMIN_EMAILS: string[] = []
 export const ALL_ADMIN_EMAILS = [...ADMIN_EMAILS]
 
 export function isAdmin(role: UserRole) {
