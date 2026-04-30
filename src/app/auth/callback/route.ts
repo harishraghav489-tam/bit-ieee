@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { getRoleDashboardPath } from '@/lib/types'
 import type { UserRole } from '@/lib/types'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
@@ -31,7 +32,6 @@ export async function GET(request: Request) {
 
         // Bypassing RLS here because Next.js request cookies are not immediately 
         // readable after writing them in the same route handler.
-        import { createClient as createAdminClient } from '@supabase/supabase-js'
         
         const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
         const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
