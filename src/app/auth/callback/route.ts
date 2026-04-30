@@ -4,6 +4,9 @@ import { ALL_ADMIN_EMAILS, getRoleDashboardPath, needsProfileCompletion } from '
 import type { UserRole } from '@/lib/types'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
 const ALLOWED_DOMAIN = 'bitsathy.ac.in'
 
 function redirectToLogin(origin: string, error: string) {
