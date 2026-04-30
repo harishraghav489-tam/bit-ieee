@@ -93,9 +93,8 @@ export default function ProfileSetupPage() {
         .single();
 
       if (!profile) {
-        toast.error("Your account is not registered. Contact your IEEE admin.");
-        await supabase.auth.signOut();
-        router.replace("/login?error=not_registered");
+        console.error("Profile not found for user:", user.email);
+        setAuthLoading(false);
         return;
       }
 

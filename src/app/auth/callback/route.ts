@@ -9,6 +9,10 @@ export const dynamic = 'force-dynamic'
 
 const ALLOWED_DOMAIN = 'bitsathy.ac.in'
 
+function redirectToHome(origin: string, error: string) {
+  return NextResponse.redirect(`${origin}/?error=${error}`)
+}
+
 function redirectToLogin(origin: string, error: string) {
   return NextResponse.redirect(`${origin}/login?error=${error}`)
 }
@@ -74,7 +78,7 @@ export async function GET(request: NextRequest) {
 
     if (!canAccessPortal(email)) {
       await supabase.auth.signOut()
-      return redirectToLogin(origin, 'unauthorized_domain')
+      return redirectToHome(origin, 'unauthorized_domain')
     }
 
     const { data: profile, error: profileError } = await getProfileByEmail(supabase, email)
@@ -89,6 +93,7 @@ export async function GET(request: NextRequest) {
       const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
       if (!supabaseUrl || !serviceRoleKey) {
+        console.error('Missing service role key for auto-registration')
         await supabase.auth.signOut()
         return redirectToLogin(origin, 'not_registered')
       }
@@ -99,24 +104,29 @@ export async function GET(request: NextRequest) {
 
       const displayName = user.user_metadata?.full_name || user.user_metadata?.name || email.split('@')[0]
 
-      const { error: insertError } = await adminClient
+      // Use upsert to handle cases where user might have been created but lookup failed
+      const { data: newProfile, error: upsertError } = await adminClient
         .from('users')
-        .insert({
+        .upsert({
           id: user.id,
           email: email,
           name: displayName,
           full_name: displayName,
           role: 'membership',
           profile_completed: false,
-        })
+        }, { onConflict: 'email' })
+        .select('role, profile_completed')
+        .single()
 
-      if (insertError) {
-        console.error('Auto-registration failed:', insertError.message)
+      if (upsertError) {
+        console.error('Auto-registration upsert failed:', upsertError.message)
         await supabase.auth.signOut()
         return redirectToLogin(origin, 'auth_failed')
       }
 
-      // New user → send to profile setup
+      if (newProfile.profile_completed) {
+        return NextResponse.redirect(`${origin}${getRoleDashboardPath(newProfile.role as UserRole)}`)
+      }
       return NextResponse.redirect(`${origin}/profile-setup`)
     }
 

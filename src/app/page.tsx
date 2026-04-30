@@ -1,10 +1,27 @@
+"use client";
 import Link from "next/link";
-import { ArrowRight, ShieldCheck, Users, Activity, Trophy, Zap, Globe, BookOpen } from "lucide-react";
+import { ArrowRight, ShieldCheck, Users, Activity, Trophy, Zap, Globe } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
-export default function Home() {
+function HomeContent() {
+  const searchParams = useSearchParams();
+  const error = searchParams.get("error");
+
   return (
     <div className="flex flex-col min-h-screen relative overflow-hidden bg-[var(--bg-main)]">
+      {/* Error Alert Banner */}
+      {error && (
+        <div className="relative z-[100] bg-red-500/10 border-b border-red-500/20 py-3 px-6 text-center animate-in fade-in slide-in-from-top duration-500">
+          <p className="text-sm font-medium text-red-500 flex items-center justify-center gap-2">
+            <ShieldCheck className="w-4 h-4" />
+            {error === 'unauthorized_domain' 
+              ? "Only @bitsathy.ac.in email addresses are allowed to access this portal." 
+              : "Authentication failed. Please try again."}
+          </p>
+        </div>
+      )}
       {/* Animated Background Orbs */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-[-15%] left-[-10%] w-[45%] h-[45%] rounded-full bg-[#00629B]/20 blur-[150px] animate-pulse" />
@@ -143,6 +160,18 @@ export default function Home() {
   );
 }
 
+export default function Home() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center bg-[var(--bg-main)]">
+        <div className="w-8 h-8 border-4 border-[#00629B] border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
+      <HomeContent />
+    </Suspense>
+  );
+}
+
 function StatItem({ value, label }: { value: string; label: string }) {
   return (
     <div className="text-center">
@@ -176,4 +205,5 @@ const societies = [
   { abbr: "EDS", name: "Electron Devices" },
   { abbr: "CSS", name: "Control Systems" },
   { abbr: "ITSS", name: "Intelligent Transportation" },
+  { abbr: "WIE", name: "Women in Engineering" },
 ];
