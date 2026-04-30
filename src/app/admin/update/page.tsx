@@ -176,13 +176,13 @@ function EventRequestsForm() {
                 <p className="text-sm text-[var(--danger)] font-bold">Venue Conflict Detected!</p>
                 <input 
                   type="text" 
-                  value={conflictOverride.venue} 
-                  onChange={e => setConflictOverride({...conflictOverride, venue: e.target.value})}
+                  value={conflictOverride!.venue} 
+                  onChange={e => setConflictOverride({...conflictOverride!, venue: e.target.value})}
                   className="w-full px-3 py-2 rounded-md bg-[var(--bg-card)] border border-[var(--border)] text-[var(--text-primary)] text-sm"
                   placeholder="Change Venue"
                 />
                 <div className="flex gap-2">
-                  <button onClick={() => handleApprove(event, true, conflictOverride.venue)} className="bg-[var(--danger)] text-white px-4 py-2 rounded-md text-sm font-bold hover:opacity-90">Force Approve</button>
+                  <button onClick={() => handleApprove(event, true, conflictOverride!.venue)} className="bg-[var(--danger)] text-white px-4 py-2 rounded-md text-sm font-bold hover:opacity-90">Force Approve</button>
                   <button onClick={() => setConflictOverride(null)} className="bg-[var(--bg-secondary)] text-[var(--text-primary)] px-4 py-2 rounded-md text-sm border border-[var(--border)]">Cancel</button>
                 </div>
               </div>
